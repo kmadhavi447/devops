@@ -1,0 +1,44 @@
+# Using multi stage Dockerfile so that one container can be avoided for web server so that resources can be easily handled
+#######################################################################
+######## Stage 1: Building front end web app with react app ###########
+#######################################################################
+
+# pulling official nodejs base image
+FROM node:13.12.0-alpine as build
+
+# Creating directories for source code
+RUN mkdir -p /usr/src/app
+
+# set working directory
+WORKDIR /usr/src/app
+
+# copying source code to container
+COPY sys-stats/ ./
+
+# Installing and building the front-end react app
+RUN npm install
+RUN npm run build
+
+#######################################################################
+######## Stage 2: Deploying frontend app on nginx webserver ###########
+#######################################################################
+
+# Pulling nginx base image
+FROM nginx:alpine
+
+# Setting the path of the working directory for the container
+WORKDIR /usr/share/nginx/html
+
+# Copying react app build files to nginx webserver
+COPY --from=build /usr/src/app/build .
+
+# Copying nginx configuration file to container
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Exposing the port of bginx webserver
+EXPOSE 80
+
+# Command to start nginx server automatically when container is started
+CMD ["nginx", "-g", "daemon off;"]
+
+############################### END  #####################################

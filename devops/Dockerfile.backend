@@ -1,0 +1,14 @@
+# Pulling python as base image
+FROM python:3.8
+
+# Setting the working directory
+WORKDIR /project
+
+# Copying the project code to container
+COPY api/ /project/
+
+# Upgrading the pip package so that latest packages are installed
+RUN pip install --upgrade pip
+
+# Installing the required python modules
+RUN pip install -r requirements.txt

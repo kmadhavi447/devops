@@ -1,0 +1,38 @@
+
+version: "3"
+
+# Defining services for running the app
+services:
+  # Defining service from frontend react application
+  frontend:
+    # Giving container name so as to easily identify the container from the group of containers
+    container_name: frontend
+    # Building the docker image for frontend application from the compose file so that images can be easily built in 
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    # Exposing the host port 
+    ports:
+      - 80:80
+    # Building the backend image before frontend so that frontend app can collect metrics from the backend
+    depends_on:
+      - backend
+
+  # service for running backend application
+  backend:
+    # restarting the container always
+    restart: always
+    # Giving container name so as to easily identify the container from the group of containers
+    container_name: backend
+    # Building the docker image for frontend application from the compose file so that images can be easily built in 
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    # Running the backend application with gunicorn server
+    command: gunicorn --bind 0.0.0.0:5000 "app:app"
+    # Exposing the host port application can be accessed from this ports
+    ports:
+      - 5000:5000
+    # persisting the application data
+    volumes:
+      - .:/usr/share/app
